@@ -1,0 +1,51 @@
+# Deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    run: node-nestjs-sample
+  name: node-nestjs-sample
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      run: node-nestjs-sample
+  template:
+    metadata:
+      labels:
+        run: node-nestjs-sample
+    spec:
+      containers:
+      - image: ${IMAGE}
+        name: app
+---
+# Ingress
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: node-nestjs-sample
+spec:
+  rules:
+    - host: nestjs.okvoices.com
+      http:
+        paths:
+          - backend:
+              serviceName: node-nestjs-sample
+              servicePort: 3000
+            path: /
+---
+# Services
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-nestjs-sample
+spec:
+  ports:
+    - name: http
+      port: 3000
+      protocol: TCP
+      targetPort: 3000
+  selector:
+    run: node-nestjs-sample
+  sessionAffinity: None
+  type: ClusterIP
